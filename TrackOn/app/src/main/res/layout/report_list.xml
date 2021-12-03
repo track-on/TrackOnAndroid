@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:layout_constraintBottom_toBottomOf="parent"
+    android:layout_marginTop="10dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:background="@drawable/custom_backround">
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/left_guide"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintGuide_begin="20dp"
+        android:orientation="vertical"
+        />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/right_guide"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintGuide_end="20dp"
+        android:orientation="vertical"
+        />
+
+    <TextView
+        android:id="@+id/report_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="신고정보 : "
+        android:textColor="@color/black"
+        android:fontFamily="@font/jua"
+        android:textSize="15sp"
+        app:layout_constraintLeft_toLeftOf="@id/left_guide"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="10dp"
+        />
+
+    <TextView
+        android:id="@+id/report_id_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="123456 | 서건희 -> 신희원"
+        android:textColor="@color/black"
+        android:fontFamily="@font/nanum_square_round_b"
+        android:textSize="15sp"
+        app:layout_constraintLeft_toRightOf="@id/report_id"
+        app:layout_constraintTop_toTopOf="@id/report_id"
+        app:layout_constraintBottom_toBottomOf="@id/report_id"
+        />
+
+    <TextView
+        android:id="@+id/report_date_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="2005-11-01"
+        android:fontFamily="@font/nanum_square_round_b"
+        android:textSize="12sp"
+        app:layout_constraintRight_toRightOf="@id/right_guide"
+        app:layout_constraintTop_toTopOf="@id/report_id"
+        app:layout_constraintBottom_toBottomOf="@id/report_id"
+        />
+
+    <TextView
+        android:id="@+id/report_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="신고내용 : "
+        android:textColor="@color/black"
+        android:fontFamily="@font/jua"
+        android:textSize="15sp"
+        app:layout_constraintLeft_toLeftOf="@id/left_guide"
+        app:layout_constraintTop_toBottomOf="@id/report_id"
+        android:layout_marginTop="10dp"
+        />
+
+    <TextView
+        android:id="@+id/report_message_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="움직임이 이상해요!"
+        android:textColor="@color/black"
+        android:fontFamily="@font/nanum_square_round_b"
+        android:textSize="15sp"
+        app:layout_constraintLeft_toRightOf="@id/report_id"
+        app:layout_constraintTop_toBottomOf="@id/report_id"
+        android:layout_marginTop="10dp"
+        />
+
+    <TextView
+        android:id="@+id/report_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="처리상태 : "
+        android:textColor="@color/black"
+        android:fontFamily="@font/jua"
+        android:textSize="15sp"
+        app:layout_constraintLeft_toLeftOf="@id/left_guide"
+        app:layout_constraintTop_toBottomOf="@id/report_message"
+        android:layout_marginTop="10dp"
+        />
+
+    <TextView
+        android:id="@+id/report_status_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="처리중"
+        android:textColor="#ff0000"
+        android:fontFamily="@font/nanum_square_round_b"
+        android:textSize="15sp"
+        app:layout_constraintLeft_toRightOf="@id/report_id"
+        app:layout_constraintTop_toBottomOf="@id/report_message"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        />
+
+    <TextView
+        android:id="@+id/report_place"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="위도 : "
+        android:textColor="@color/black"
+        android:fontFamily="@font/jua"
+        android:textSize="15sp"
+        app:layout_constraintRight_toLeftOf="@id/report_place_text"
+        app:layout_constraintTop_toBottomOf="@id/report_message"
+        android:layout_marginTop="10dp"
+        />
+
+    <TextView
+        android:id="@+id/report_place2_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="37.01231"
+        android:textColor="@color/black"
+        android:fontFamily="@font/nanum_square_round_b"
+        android:textSize="15sp"
+        app:layout_constraintRight_toRightOf="@id/right_guide"
+        app:layout_constraintBottom_toTopOf="@id/report_place"
+        android:layout_marginBottom="3dp"
+        android:layout_marginTop="10dp"
+        />
+
+    <TextView
+        android:id="@+id/report2_place"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="경도 : "
+        android:textColor="@color/black"
+        android:fontFamily="@font/jua"
+        android:textSize="15sp"
+        app:layout_constraintRight_toLeftOf="@id/report_place2_text"
+        app:layout_constraintBottom_toTopOf="@id/report_place"
+        android:layout_marginBottom="3dp"
+        />
+
+    <TextView
+        android:id="@+id/report_place_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="37.01231"
+        android:textColor="@color/black"
+        android:fontFamily="@font/nanum_square_round_b"
+        android:textSize="15sp"
+        app:layout_constraintRight_toRightOf="@id/right_guide"
+        app:layout_constraintTop_toBottomOf="@id/report_message"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
