@@ -1,6 +1,9 @@
 package com.example.trackon.ui.mainpage
 
 import android.Manifest.permission.ACCESS_FINE_LOCATION
+import android.app.Activity
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothServerSocket
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -10,6 +13,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
+import android.view.View
 import android.widget.Button
 import android.widget.RelativeLayout
 import android.widget.TextView
@@ -18,6 +22,9 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import app.akexorcist.bluetotohspp.library.BluetoothSPP
+import app.akexorcist.bluetotohspp.library.BluetoothState
+import app.akexorcist.bluetotohspp.library.DeviceList
 import com.example.trackon.R
 import com.example.trackon.method.MakeToast
 import com.example.trackon.model.data.Marker
@@ -35,8 +42,6 @@ import net.daum.mf.map.api.MapPoint
 import net.daum.mf.map.api.MapReverseGeoCoder
 import net.daum.mf.map.api.MapView
 import org.json.JSONObject
-import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
 import kotlin.collections.set
 
 
@@ -53,10 +58,13 @@ class MainPageActivity : AppCompatActivity(), MainPageContract.View {
     private lateinit var logout: Button
     private lateinit var locationBtn: Button
     private lateinit var cancelBtn: Button
+    private lateinit var bluetooth: Button
     private lateinit var map: MapView
     private lateinit var view:RelativeLayout
+    private lateinit var lightBtn: Button
 
     private lateinit var socket: Socket
+    private val bt: BluetoothSPP = BluetoothSPP(this)
 
     private var buttonName = "내위치"
     private var isLocation = true
@@ -64,6 +72,11 @@ class MainPageActivity : AppCompatActivity(), MainPageContract.View {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main_page)
+
+        if(!bt.isBluetoothAvailable) {
+            makeToast.setToast("Bluetooth is not available", this)
+            gotoLogin()
+        }
 
         tokens = getSharedPreferences("token", MODE_PRIVATE)
 
@@ -73,12 +86,18 @@ class MainPageActivity : AppCompatActivity(), MainPageContract.View {
         locationBtn = findViewById(R.id.location_btn)
         cancelBtn = findViewById(R.id.cancel_btn)
         map = MapView(this)
+        bluetooth = findViewById(R.id.bluetooth)
+        lightBtn = findViewById(R.id.light_on)
 
         view.addView(map)
 
         presenter.getName(getAccessToken())
 
         locationBtn.text = buttonName
+
+        bt.setOnDataReceivedListener{ data, message ->
+            Log.d("blue", message)
+        }
 
         val mapPoint = MapPoint.mapPointWithGeoCoord(37.5283169, 126.9294254)
         val address = MapReverseGeoCoder.findAddressForMapPoint("2766585da6e51ecd7c02786b6e8674bf", mapPoint)
@@ -149,6 +168,53 @@ class MainPageActivity : AppCompatActivity(), MainPageContract.View {
 
             dialog.show()
         }
+
+        bluetooth.setOnClickListener {
+            if(bt.serviceState == BluetoothState.STATE_CONNECTED) {
+                bt.disconnect()
+            }else {
+                val intent = Intent(applicationContext, DeviceList::class.java)
+                startActivityForResult(intent, BluetoothState.REQUEST_CONNECT_DEVICE)
+            }
+        }
+
+
+        bt.setBluetoothConnectionListener(object : BluetoothSPP.BluetoothConnectionListener {
+            override fun onDeviceConnected(name: String?, address: String?) {
+                makeToast.setToast("connected : $name", this@MainPageActivity)
+                Log.d(address, "$name connected")
+            }
+
+            override fun onDeviceDisconnected() {
+                makeToast.setToast("disconnect", this@MainPageActivity)
+                Log.d("log", "disconnected")
+            }
+
+            override fun onDeviceConnectionFailed() {
+                makeToast.setToast("failed connecting", this@MainPageActivity)
+                Log.d("failed", "failed")
+            }
+
+        })
+
+        lightBtn.setOnClickListener {
+            if(bt.serviceState != BluetoothState.STATE_CONNECTED) {
+                makeToast.setToast("블루투스가 연결되어 있지 않습니다.", this)
+                return@setOnClickListener
+            }
+
+            bt.send("1", true)
+        }
+
+        lightBtn.setOnLongClickListener {
+            bt.disconnect()
+            return@setOnLongClickListener true
+        }
+    }
+
+    override fun onDestroy() {
+        bt.stopService()
+        super.onDestroy()
     }
 
     override fun setName(user: User) {
@@ -264,7 +330,6 @@ class MainPageActivity : AppCompatActivity(), MainPageContract.View {
     private val onMarker: Emitter.Listener = Emitter.Listener {
         args ->
         val json = args[0].toString()
-        println(json)
 
         val jsonObject = JSONObject(json)
 
@@ -280,7 +345,7 @@ class MainPageActivity : AppCompatActivity(), MainPageContract.View {
                 markerIndex[id]!!.mapPoint = MapPoint.mapPointWithGeoCoord(latitude, longitude)
                 map.addPOIItem(markerIndex[id]!!)
             }else {
-                val markerData = Marker(id, name, longitude, latitude);
+                val markerData = Marker(id, name, longitude, latitude)
 
                 val mapPoint = MapPoint.mapPointWithGeoCoord(latitude, longitude)
 
@@ -289,7 +354,7 @@ class MainPageActivity : AppCompatActivity(), MainPageContract.View {
                 marker.tag = 0
                 marker.mapPoint = mapPoint
                 marker.markerType = MapPOIItem.MarkerType.BluePin // 기본으로 제공하는 BluePin 마커 모양.
-                marker.selectedMarkerType = MapPOIItem.MarkerType.RedPin;
+                marker.selectedMarkerType = MapPOIItem.MarkerType.RedPin
                 marker.userObject = markerData
 
                 markerIndex[id] = marker
@@ -313,5 +378,38 @@ class MainPageActivity : AppCompatActivity(), MainPageContract.View {
     // 위치추적 중지
     private fun stopTracking() {
         map.currentLocationTrackingMode = MapView.CurrentLocationTrackingMode.TrackingModeOff
+    }
+
+    override fun onStart() {
+        super.onStart()
+        if (!bt.isBluetoothEnabled()) { //
+            val intent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(intent, BluetoothState.REQUEST_ENABLE_BT);
+        } else {
+            if (!bt.isServiceAvailable()) {
+                bt.setupService();
+                bt.startService(BluetoothState.DEVICE_OTHER); //DEVICE_ANDROID는 안드로이드 기기 끼리
+            }
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode == BluetoothState.REQUEST_CONNECT_DEVICE) {
+            if (resultCode == Activity.RESULT_OK)
+                bt.connect(data)
+        } else if (requestCode == BluetoothState.REQUEST_ENABLE_BT) {
+            if (resultCode == Activity.RESULT_OK) {
+                bt.setupService()
+                bt.startService(BluetoothState.DEVICE_OTHER)
+                bt.send("connect", true)
+            } else {
+                Toast.makeText(
+                    applicationContext
+                        , "Bluetooth was not enabled."
+                        , Toast.LENGTH_SHORT).show()
+                finish()
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data)
     }
 }

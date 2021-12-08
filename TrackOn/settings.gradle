@@ -1,2 +1,3 @@
 rootProject.name = "TrackOn"
 include ':app'
+include ':gauth_library'
