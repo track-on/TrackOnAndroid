@@ -97,6 +97,7 @@ class MainPageActivity : AppCompatActivity(), MainPageContract.View {
 
         bt.setOnDataReceivedListener{ data, message ->
             Log.d("blue", message)
+            println("데이터 받음")
         }
 
         val mapPoint = MapPoint.mapPointWithGeoCoord(37.5283169, 126.9294254)
